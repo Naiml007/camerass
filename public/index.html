@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen Capture</title>
+  <style>
+    #videoElement {
+      width: 100%;
+      max-width: 640px;
+    }
+  </style>
+</head>
+<body>
+  <video id="videoElement" autoplay></video>
+  <script>
+    const video = document.getElementById('videoElement');
+
+    function takeScreenshot() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        const formData = new FormData();
+        formData.append('screenshot', blob, 'screenshot.png'); // Add filename
+
+        fetch('/save-screenshot', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Screenshot saved successfully');
+          } else {
+            console.error('Failed to save screenshot:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error saving screenshot:', error);
+        });
+      }, 'image/png');
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        console.error('Unable to access the camera:', err);
+      });
+
+    function takeScreenshotsInLoop(count, interval) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(takeScreenshot, i * interval);
+      }
+    }
+
+    takeScreenshotsInLoop(5, 3000);
+  </script>
+</body>
+</html>

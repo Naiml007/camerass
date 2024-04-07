@@ -1,0 +1,8 @@
+.cache
+.upm
+node_modules
+.replit
+package-lock.json
+replit.nix
+index (copy).js
+index (copy) 1.js
